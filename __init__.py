@@ -50,7 +50,7 @@ class SpotifyWebApiClient:
             yield Device(**device)
 
     def skip(self):
-        self.session.put(
+        self.session.post(
             url='https://api.spotify.com/v1/me/player/next',
         )
         
@@ -114,8 +114,23 @@ class Session:
                 json=json,
                 **kwargs,
             )
-
         return self._execute_request(put_request)
+
+
+    def post(self, url, json=None, **kwargs):
+        # Workaround for urequests not sending "Content-Length" on empty data
+        if json is None:
+            json = {}
+
+        def post_request():
+            return requests.post(
+                url=self._add_device_id(url),
+                headers=self._headers(),
+                json=json,
+                **kwargs,
+            )
+
+        return self._execute_request(post_request)
 
     def _headers(self):
         return {'Authorization': 'Bearer {access_token}'.format(**self.credentials)}
