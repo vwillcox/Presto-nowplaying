@@ -41,22 +41,28 @@ vector.set_transform(t)
 
 # Touch buttons
 start_button = Button(1, HEIGHT - 50, CX - 2, 49)
+skip_button = Button(WIDTH - CX, HEIGHT - 50, CX -2, 49)
 
 start = Polygon()
 start.rectangle(*start_button.bounds, (5, 5, 5, 5))
+
+skip = Polygon()
+skip.rectangle(*skip_button.bounds, (5, 5, 5, 5))
+
 
 outline = Polygon()
 outline.rectangle(5, 20, WIDTH - 10, HEIGHT - 100, (5, 5, 5, 5), 2)
 
 def truncate_string(input_string):
-    if len(input_string) > 38:
-        return input_string[:38]
+    if len(input_string) > 36:
+        return input_string[:36]
     else:
         return(input_string)
     return 
 
 while True:
     try:
+        touch.poll()
         now_playing = spotify.get_currently_playing
         current_track = now_playing()
         is_playing = current_track['is_playing']
@@ -64,6 +70,8 @@ while True:
         display.clear()    
         display.set_pen(GREEN)
         vector.draw(start)
+        display.set_pen(RED)
+        vector.draw(skip)
         display.set_pen(WHITE)
         vector.draw(outline)
         vector.set_font_size(32)
@@ -74,12 +82,20 @@ while True:
             display_track = truncate_string(str(cur_track))
             vector.text(str(display_track), 10, 80)
             vector.text("Pause", start_button.bounds[0] +83, start_button.bounds[1] + 33)
-            if start_button.is_pressed():
-                spotify.pause()
-        else:
+            vector.text("Skip", skip_button.bounds[0] + 83, skip_button.bounds[1] + 33)
+        if is_playing and skip_button.is_pressed():
+            print("I am trying to skip!")
+            spotify.skip()
+        if is_playing and start_button.is_pressed():
+            spotify.pause()
+        elif is_playing is False:
             vector.text("Play", start_button.bounds[0] +83, start_button.bounds[1] + 33)
             if start_button.is_pressed():
                 spotify.play()
+        elif is_playing is False and start_button.is_pressed():
+            spotify.play()
+        else:
+            pass
         presto.update()
     except Exception as e:
         print(e)
