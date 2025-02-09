@@ -49,6 +49,18 @@ class SpotifyWebApiClient:
         for device in response['devices']:
             yield Device(**device)
 
+    def skip(self):
+        self.session.put(
+            url='https://api.spotify.com/v1/me/player/next',
+        )
+        
+    def get_currently_playing(self):
+        response = self.session.get(
+            url = 'https://api.spotify.com/v1/me/player/currently-playing'
+        )
+        #for device in response['devices']:
+        #    yield Device(**device)
+        return(response)
 
 class Device:
     def __init__(
@@ -69,7 +81,7 @@ class Device:
         self.name = name
         self.type = type
         self.volume_percent = volume_percent
-        self.supports_volume = false
+        self.supports_volume = supports_volume
 
     def __repr__(self):
         return 'Device(name={}, type={}, id={})'.format(self.name, self.type, self.id)
@@ -279,3 +291,4 @@ def urlencode(query):
             v = quote_plus(str(value))
             li.append(k + '=' + v)
     return '&'.join(li)
+
